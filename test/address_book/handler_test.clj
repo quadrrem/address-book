@@ -21,4 +21,17 @@
     (count (query/all-contacts)) => 0
     (let [response (app (mock/request :post "/post"  {:name "Bodhi" :phone "555-7890" :email "bells@beach.com"}))]
       (:status response) => 302
-      (count (query/all-contacts)) => 1))))
+      (count (query/all-contacts)) => 1))
+
+  (fact "Test UPDATE a post request to /edit/<contact-id> updates desired contact information"
+    (query/insert-contact<! {:name "JT" :phone "(321)" :email "JTJT.com"})
+    (let [response (app (mock/request :post "/edit/1" {:id "1" :name "Jrock" :phone "(999) 888-7777" :email "jrock@test.com"}))]
+      (:status response) => 302
+        (count (query/all-contacts)) => 1
+        (first (query/all-contacts)) => {:id 1 :name "Jrock" :phone "(999) 888-7777" :email "jrock@test.com"}))
+
+  (fact "Test DELETED a post to /delete/<contact-id> deletes desired contact from database"
+    (query/insert-contact<! {:name "JT" :phone "(321)" :email "JT@JT.com"})
+    (count (query/all-contacts)) => 1
+    (let [response (app (mock/request :post "/delete/1" {:id 1}))]
+      (count (query/all-contacts)) => 0))))
